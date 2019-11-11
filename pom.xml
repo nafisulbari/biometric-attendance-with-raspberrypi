@@ -41,6 +41,20 @@
             <version>1.7.25</version>
         </dependency>
 
+
+        <!-- Goole sheet dependencies   -->
+
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>1.25.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-sheets</artifactId>
+            <version>v4-rev539-1.25.0</version>
+        </dependency>
+
     </dependencies>
 
 
