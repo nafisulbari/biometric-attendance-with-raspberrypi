@@ -30,18 +30,19 @@ public class SensorMain {
 
     public static String SPREADSHEET_ID = "1fJwkkomVpD5jRGDzFV_jsTr2NzaKSoWc1Odqjc0N26M";
 
-    public static <Employee> void main(String[] args) {
+    public static void main(String[] args) {
         try {
-            List<Student> students = new ArrayList<Student>();
-            ;
-
-            System.out.println(students.toString());
-
+            List<Student> sheetStudents = new ArrayList<Student>();
             GoogleSheetsService service = new GoogleSheetsService(
                     GoogleSheetsUtil.getSheetsService());
-            //Reading from google sheet
 
-//read from B3 to B10
+//Attendance index selector from A1----------------------------------------------------------
+            ValueRange checkingIndex = service.getRange(SPREADSHEET_ID, "A1:A2");
+            List<List<Object>> tempIndex = checkingIndex.getValues();
+            String index=tempIndex.toString().substring(2,tempIndex.toString().length()-2);
+            System.out.println("index :"+index);
+
+//read from B3 to B50 to know list of students---------------------------------------
             ValueRange result = service.getRange(SPREADSHEET_ID, "B3:B50");
             //int numRows = result.getValues() != null ? result.getValues().size() : 0;
 
@@ -50,58 +51,22 @@ public class SensorMain {
             System.out.println("loop");
             for (Object l : list) {
                 //removing first and last char []
-                int id = list.indexOf(l)+3;
+                int id = list.indexOf(l) + 3;
                 String stdId = l.toString().substring(1, l.toString().length() - 1);
 
                 System.out.println("index: " + id + " stdId: " + stdId);
-                students.add(new Student(id, stdId));
+                sheetStudents.add(new Student(id, stdId));
             }
-            System.out.println(students.toString());
-//write------------------------------------------------------------------
+            System.out.println(sheetStudents.toString());
+//write-----------------------------------------------------------------------------
 
-            Sheets sheets = GoogleSheetsUtil.getSheetsService();
 
-            List<ValueRange> data = new ArrayList<>();
-//write present at E3
-            data.add(new ValueRange()
-                    .setRange("E3")
-                    .setValues(Arrays.asList(
-                            Arrays.asList("present"))));
 
-            BatchUpdateValuesRequest batchBody = new BatchUpdateValuesRequest()
-                    .setValueInputOption("RAW")
-                    .setData(data);
 
-            BatchUpdateValuesResponse batchResult = sheets.spreadsheets().values()
-                    .batchUpdate(SPREADSHEET_ID, batchBody)
-                    .execute();
-            System.out.println("cells updated: " + batchResult.getTotalUpdatedCells());
+
+
+
 //sensor--------------------------------------------------------------------------------
-
-
-
-
-
-            DbStudent std = new DbStudent();
-
-            std.setStd_Id("1610");
-
-            String s="gg";
-            byte[] bs=s.getBytes();
-            std.setFingerPrint(bs);
-
-            DbStudentService dbService = new DbStudentService();
-            dbService.saveStudent(std);
-
-            List stdList= dbService.getStudentsList();
-            for (Object o: stdList) {
-                System.out.println(o.toString());
-            }
-
-
-
-
-
 
 
             // Connect (sensor is connected through UART to USB converter)
@@ -112,31 +77,73 @@ public class SensorMain {
             HashMap<Integer, HashMap> db = new HashMap<>();
             sensor.connect();
 
-            for (int i = 0; i < 3; i++) {
-                System.out.println("place finger " + i);
-                Thread.sleep(3000);
-                if (sensor.hasFingerprint()) {
+//DB operations to SAVE STUDENT fingerprint in DB --------------------------------------
+//            sensor.clearAllSaved();
+//            for (int i = 0; i < 1; i++) {
+//                System.out.println("place finger " + i);
+//                Thread.sleep(3000);
+//                if (sensor.hasFingerprint()) {
+//
+//                    model = sensor.createModel();
+//                    Thread.sleep(50);
+//                    System.out.println("created model");
+//
+//                    DbStudent dbStudent = new DbStudent();
+//                    dbStudent.setStd_Id("16101238");
+//                    dbStudent.setFingerPrint(model);
+//                    DbStudentService dbService = new DbStudentService();
+//                    dbService.saveStudent(dbStudent);
+//                }
+//            }
 
-                    model = sensor.createModel();
-                    Thread.sleep(50);
-                    System.out.println("created model");
-                    sensor.saveStoredModel(i);
 
+//SAVING DB fingerprint to sensor memory according to STD_ID cell no in sheets-----------------------
+            DbStudentService dbStudentService = new DbStudentService();
+            List<DbStudent> dbStdList = dbStudentService.getStudentsList();
+            System.out.println("list of stdss" + dbStdList.toString());
+
+            for (Student sheetStd : sheetStudents) {
+                for (DbStudent dbStd: dbStdList) {
+                    if (sheetStd.getStdId().equals(dbStd.getStd_Id())){
+                        sensor.saveModel(dbStd.getFingerPrint(), sheetStd.getId());
+                        System.out.println("db std id: "+dbStd.getStd_Id()+"sheet std id: "+sheetStd.getId());
+                    }
                 }
             }
+//fingerprint match checker------------------------------------------------------------------
             while (true) {
                 System.out.println("checking finger match");
                 if (sensor.hasFingerprint()) {
                     Integer fingerId = sensor.searchFingerprint();
                     if (fingerId != null) { // Already known fingerprint
                         System.out.println("Scanned fingerprint with ID " + fingerId);
+
+
+                        Sheets sheets = GoogleSheetsUtil.getSheetsService();
+
+                        List<ValueRange> data = new ArrayList<>();
+                        data.add(new ValueRange()
+                                //determining in which index to put authenticated attendance  index=A1,
+                                .setRange(index+fingerId)
+                                .setValues(Arrays.asList(
+                                        Arrays.asList("1"))));
+
+                        BatchUpdateValuesRequest batchBody = new BatchUpdateValuesRequest()
+                                .setValueInputOption("RAW")
+                                .setData(data);
+
+                        BatchUpdateValuesResponse batchResult = sheets.spreadsheets().values()
+                                .batchUpdate(SPREADSHEET_ID, batchBody)
+                                .execute();
+                        System.out.println("cells updated: " + batchResult.getTotalUpdatedCells());
+
                     } else {
                         System.out.println("no match");
                     }
                 }
             }
 
-        } catch (FingerprintException | InterruptedException | NullPointerException e) {
+        } catch (FingerprintException  | NullPointerException e) {
             e.printStackTrace();
         } catch (GeneralSecurityException e) {
             e.printStackTrace();

@@ -12,20 +12,14 @@ import java.util.List;
 public class DbStudentService {
 
     public SessionFactory factory = new Configuration().configure().addAnnotatedClass(DbStudent.class).buildSessionFactory();
-    public Session session = factory.openSession();
     public Transaction tx = null;
 
     public void saveStudent(DbStudent std) {
-
+        Session session = factory.openSession();
         Integer stdId = null;
 
         try {
             tx = session.beginTransaction();
-
-            std.setStd_Id("16101237");
-            String s = "gg";
-            byte[] ba = s.getBytes();
-            std.setFingerPrint(ba);
 
             stdId = (Integer) session.save(std);
             tx.commit();
@@ -35,16 +29,17 @@ public class DbStudentService {
             if (tx != null) tx.rollback();
             e.printStackTrace();
         } finally {
+            session.close();
             System.out.println("saved std: " + std.toString());
 
         }
 
     }
 
-    public List getStudentsList() {
-
-        List studentsList = session.createQuery("FROM DbStudent").list();
-
+    public List<DbStudent> getStudentsList() {
+        Session session = factory.openSession();
+        List<DbStudent> studentsList = (List<DbStudent>) session.createQuery("FROM DbStudent").list();
+        session.close();
         return studentsList;
     }
 }
