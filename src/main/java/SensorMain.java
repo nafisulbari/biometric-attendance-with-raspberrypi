@@ -89,7 +89,7 @@ public class SensorMain {
 //                    System.out.println("created model");
 //
 //                    DbStudent dbStudent = new DbStudent();
-//                    dbStudent.setStd_Id("16101238");
+//                    dbStudent.setStd_Id("16101239");
 //                    dbStudent.setFingerPrint(model);
 //                    DbStudentService dbService = new DbStudentService();
 //                    dbService.saveStudent(dbStudent);
@@ -98,6 +98,7 @@ public class SensorMain {
 
 
 //SAVING DB fingerprint to sensor memory according to STD_ID cell no in sheets-----------------------
+            sensor.clearAllSaved();
             DbStudentService dbStudentService = new DbStudentService();
             List<DbStudent> dbStdList = dbStudentService.getStudentsList();
             System.out.println("list of stdss" + dbStdList.toString());
