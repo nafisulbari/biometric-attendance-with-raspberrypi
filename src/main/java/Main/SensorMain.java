@@ -29,12 +29,14 @@ import java.util.*;
 
 public class SensorMain {
     //Input SPREADSHEET_ID----------------------------------------------------------------------
-    public static String SPREADSHEET_ID = "1fJwkkomVpD5jRGDzFV_jsTr2NzaKSoWc1Odqjc0N26M";
+    public static String SPREADSHEET_ID = "SPREADSHEET_ID";
 
     public static void main(String[] args) {
         try {
 
+
             //Display-----------------------------------------------------------------------------
+
             I2CDevice _device = null;
             I2CLCD lcd = null;
             I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
@@ -73,7 +75,9 @@ public class SensorMain {
             System.out.println(sheetStudents.toString());
 
 
+
             //sensor Connection--------------------------------------------------------------------------------
+
             // Connect (sensor is connected through UART to USB converter)
             //"COM3" for pc com port3,   "/dev/ttyUSB0" for pi usb0
             FingerprintSensor sensor = new AdafruitSensor("/dev/ttyUSB0");
@@ -115,6 +119,7 @@ public class SensorMain {
                     }
                 }
             }
+
             //fingerprint match checker------------------------------------------------------------------
             while (true) {
                 lcd.clear();
