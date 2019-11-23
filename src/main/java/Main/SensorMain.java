@@ -28,13 +28,13 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 
 public class SensorMain {
-
+    //Input SPREADSHEET_ID----------------------------------------------------------------------
     public static String SPREADSHEET_ID = "1fJwkkomVpD5jRGDzFV_jsTr2NzaKSoWc1Odqjc0N26M";
 
     public static void main(String[] args) {
         try {
 
-//Display-----------------------------------------------------------------------------
+            //Display-----------------------------------------------------------------------------
             I2CDevice _device = null;
             I2CLCD lcd = null;
             I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
@@ -49,13 +49,13 @@ public class SensorMain {
             GoogleSheetsService service = new GoogleSheetsService(
                     GoogleSheetsUtil.getSheetsService());
 
-//Attendance index selector from A1----------------------------------------------------------
+            //Attendance index selector from A1----------------------------------------------------------
             ValueRange checkingIndex = service.getRange(SPREADSHEET_ID, "A1:A2");
             List<List<Object>> tempIndex = checkingIndex.getValues();
             String index = tempIndex.toString().substring(2, tempIndex.toString().length() - 2);
             System.out.println("index :" + index);
 
-//read from B3 to B50 to know list of students---------------------------------------
+            //read from B3 to B50 to know list of students---------------------------------------
             ValueRange result = service.getRange(SPREADSHEET_ID, "B3:B50");
             //int numRows = result.getValues() != null ? result.getValues().size() : 0;
 
@@ -73,7 +73,7 @@ public class SensorMain {
             System.out.println(sheetStudents.toString());
 
 
-//sensor Connection--------------------------------------------------------------------------------
+            //sensor Connection--------------------------------------------------------------------------------
             // Connect (sensor is connected through UART to USB converter)
             //"COM3" for pc com port3,   "/dev/ttyUSB0" for pi usb0
             FingerprintSensor sensor = new AdafruitSensor("/dev/ttyUSB0");
@@ -101,7 +101,7 @@ public class SensorMain {
 //            }
 
 
-//SAVING DB fingerprint to sensor memory according to STD_ID cell no in sheets-----------------------
+            //SAVING DB fingerprint to sensor memory according to STD_ID cell no in sheets-----------------------
             sensor.clearAllSaved();
             DbStudentService dbStudentService = new DbStudentService();
             List<DbStudent> dbStdList = dbStudentService.getStudentsList();
@@ -115,7 +115,7 @@ public class SensorMain {
                     }
                 }
             }
-//fingerprint match checker------------------------------------------------------------------
+            //fingerprint match checker------------------------------------------------------------------
             while (true) {
                 lcd.clear();
                 lcd.display_string_pos("Please", 1, 0);
