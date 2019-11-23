@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="FingerPrint:jar">
+  <artifact type="jar" build-on-make="true" name="FingerPrint:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/FingerPrint_jar</output-path>
     <root id="archive" name="FingerPrint.jar">
       <element id="module-output" name="FingerPrint" />
@@ -32,6 +32,7 @@
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.2/commons-logging-1.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/http-client/google-http-client/1.25.0/google-http-client-1.25.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jboss/jandex/2.0.3.Final/jandex-2.0.3.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/pi4j/pi4j-core/1.2/pi4j-core-1.2.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
