@@ -18,13 +18,14 @@
 
 
     <dependencies>
+
+
+        <!-- https://mvnrepository.com/artifact/com.pi4j/pi4j-core -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-core</artifactId>
             <version>1.2</version>
         </dependency>
-
-
 
 
         <!-- Serial interface lib -->
@@ -44,7 +45,6 @@
 
 
         <!-- Goole sheet dependencies   -->
-
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
