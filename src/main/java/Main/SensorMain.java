@@ -27,8 +27,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
-
-
 public class SensorMain {
 
     public static String SPREADSHEET_ID = "1fJwkkomVpD5jRGDzFV_jsTr2NzaKSoWc1Odqjc0N26M";
@@ -36,7 +34,16 @@ public class SensorMain {
     public static void main(String[] args) {
         try {
 
-
+//Display-----------------------------------------------------------------------------
+            I2CDevice _device = null;
+            I2CLCD lcd = null;
+            I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
+            _device = bus.getDevice(0x27);
+            lcd = new I2CLCD(_device);
+            lcd.init();
+            lcd.backlight(true);
+            lcd.display_string_pos("App started", 1, 0);
+            Thread.sleep(10000);
 
             List<Student> sheetStudents = new ArrayList<Student>();
             GoogleSheetsService service = new GoogleSheetsService(
@@ -66,22 +73,10 @@ public class SensorMain {
             System.out.println(sheetStudents.toString());
 
 
-//Display-----------------------------------------------------------------------------
-            I2CDevice _device = null;
-            I2CLCD lcd = null;
-            I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
-            _device = bus.getDevice(0x27);
-            lcd = new I2CLCD(_device);
-            lcd.init();
-            lcd.backlight(true);
-            lcd.display_string_pos("App started", 1, 0);
-
 //sensor Connection--------------------------------------------------------------------------------
             // Connect (sensor is connected through UART to USB converter)
             //"COM3" for pc com port3,   "/dev/ttyUSB0" for pi usb0
-
             FingerprintSensor sensor = new AdafruitSensor("/dev/ttyUSB0");
-
             byte[] model = null;
             HashMap<Integer, HashMap> db = new HashMap<>();
             sensor.connect();
@@ -120,13 +115,13 @@ public class SensorMain {
                     }
                 }
             }
-
 //fingerprint match checker------------------------------------------------------------------
             while (true) {
                 lcd.clear();
                 lcd.display_string_pos("Please", 1, 0);
                 lcd.display_string_pos("Input Finger", 2, 0);
                 Thread.sleep(1000);
+
                 System.out.println("checking finger match");
 
                 if (sensor.hasFingerprint()) {
@@ -153,11 +148,9 @@ public class SensorMain {
                         System.out.println("cells updated: " + batchResult.getTotalUpdatedCells());
 
 
-
                         lcd.clear();
                         lcd.display_string_pos(sheetStudents.get(fingerId-3).getStdId(), 1, 0);
                         lcd.display_string_pos("Confirm", 2, 0);
-
                         Thread.sleep(2000);
                     } else {
                         System.out.println("no match");

@@ -19,8 +19,7 @@ public class I2CLCD {
         _device = device;
     }
 
-
-
+    // Write a single command
     private void write_cmd(byte cmd) {
         try {
             _device.write(cmd);
@@ -91,7 +90,7 @@ public class I2CLCD {
     private final byte LCD_SETCGRAMADDR = (byte) 0x40;
     private final byte LCD_SETDDRAMADDR = (byte) 0x80;
 
-
+    // flags for display entry mode
     private final byte LCD_ENTRYRIGHT = (byte) 0x00;
     private final byte LCD_ENTRYLEFT = (byte) 0x02;
     private final byte LCD_ENTRYSHIFTINCREMENT = (byte) 0x01;
@@ -206,7 +205,6 @@ public class I2CLCD {
     }
 
     // clear lcd and set to home
-
     public void clear() {
         lcd_write((byte) LCD_CLEARDISPLAY);
         lcd_write((byte) LCD_RETURNHOME);
@@ -257,4 +255,3 @@ public class I2CLCD {
         }
     }
 }
-
