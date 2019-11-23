@@ -9,10 +9,13 @@ import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
 import com.google.api.services.sheets.v4.model.BatchUpdateValuesResponse;
 
 import com.google.api.services.sheets.v4.model.ValueRange;
-
+import com.pi4j.io.i2c.I2CBus;
+import com.pi4j.io.i2c.I2CDevice;
+import com.pi4j.io.i2c.I2CFactory;
 import google.GoogleSheetsService;
 import google.GoogleSheetsUtil;
 
+import i2c.I2CLCD;
 import sk.mimac.fingerprint.FingerprintException;
 import sk.mimac.fingerprint.FingerprintSensor;
 
@@ -23,12 +26,26 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
+
+
 public class SensorMain {
 
     public static String SPREADSHEET_ID = "1fJwkkomVpD5jRGDzFV_jsTr2NzaKSoWc1Odqjc0N26M";
 
     public static void main(String[] args) {
         try {
+
+//initializing lcd-------------------------------------------------
+//            I2CDevice _device = null;
+//            I2CLCD lcd = null;
+//            I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
+//            _device = bus.getDevice(0x27);
+//            lcd = new I2CLCD(_device);
+//            lcd.init();
+//            lcd.backlight(true);
+//            lcd.display_string_pos("App started", 1, 0);
+
+
             List<Student> sheetStudents = new ArrayList<Student>();
             GoogleSheetsService service = new GoogleSheetsService(
                     GoogleSheetsUtil.getSheetsService());
@@ -36,8 +53,8 @@ public class SensorMain {
 //Attendance index selector from A1----------------------------------------------------------
             ValueRange checkingIndex = service.getRange(SPREADSHEET_ID, "A1:A2");
             List<List<Object>> tempIndex = checkingIndex.getValues();
-            String index=tempIndex.toString().substring(2,tempIndex.toString().length()-2);
-            System.out.println("index :"+index);
+            String index = tempIndex.toString().substring(2, tempIndex.toString().length() - 2);
+            System.out.println("index :" + index);
 
 //read from B3 to B50 to know list of students---------------------------------------
             ValueRange result = service.getRange(SPREADSHEET_ID, "B3:B50");
@@ -55,18 +72,13 @@ public class SensorMain {
                 sheetStudents.add(new Student(id, stdId));
             }
             System.out.println(sheetStudents.toString());
-//write-----------------------------------------------------------------------------
-
-
-
-
 
 
 
 //sensor Connection--------------------------------------------------------------------------------
             // Connect (sensor is connected through UART to USB converter)
             //"COM3" for pc com port3,   "/dev/ttyUSB0" for pi usb0
-            FingerprintSensor sensor = new AdafruitSensor("/dev/ttyUSB0");
+            FingerprintSensor sensor = new AdafruitSensor("COM3");
 
             byte[] model = null;
 
@@ -100,28 +112,29 @@ public class SensorMain {
             System.out.println("list of stdss" + dbStdList.toString());
 
             for (Student sheetStd : sheetStudents) {
-                for (DbStudent dbStd: dbStdList) {
-                    if (sheetStd.getStdId().equals(dbStd.getStd_Id())){
+                for (DbStudent dbStd : dbStdList) {
+                    if (sheetStd.getStdId().equals(dbStd.getStd_Id())) {
                         sensor.saveModel(dbStd.getFingerPrint(), sheetStd.getId());
-                        System.out.println("db std id: "+dbStd.getStd_Id()+"sheet std id: "+sheetStd.getId());
+                        System.out.println("db std id: " + dbStd.getStd_Id() + "sheet std id: " + sheetStd.getId());
                     }
                 }
             }
+
 //fingerprint match checker------------------------------------------------------------------
             while (true) {
+        //        lcd.display_string_pos("Input Finger", 1, 0);
                 System.out.println("checking finger match");
                 if (sensor.hasFingerprint()) {
                     Integer fingerId = sensor.searchFingerprint();
                     if (fingerId != null) { // Already known fingerprint
                         System.out.println("Scanned fingerprint with ID " + fingerId);
 
-
                         Sheets sheets = GoogleSheetsUtil.getSheetsService();
 
                         List<ValueRange> data = new ArrayList<>();
                         data.add(new ValueRange()
                                 //determining in which index to put authenticated attendance  index=A1,
-                                .setRange(index+fingerId)
+                                .setRange(index + fingerId)
                                 .setValues(Arrays.asList(
                                         Arrays.asList("1"))));
 
@@ -133,18 +146,22 @@ public class SensorMain {
                                 .batchUpdate(SPREADSHEET_ID, batchBody)
                                 .execute();
                         System.out.println("cells updated: " + batchResult.getTotalUpdatedCells());
-
+                    //    lcd.display_string_pos(fingerId.toString(), 1, 0);
+                     //   lcd.display_string_pos("Confirmed", 1, 0);
+                        Thread.sleep(2000);
                     } else {
                         System.out.println("no match");
                     }
                 }
             }
 
-        } catch (FingerprintException  | NullPointerException e) {
+        } catch (FingerprintException | NullPointerException e) {
             e.printStackTrace();
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
